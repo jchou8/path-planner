@@ -8,7 +8,7 @@ An API that supports building a map and finding the optimal path through it.
 ### Backend
 3. Navigate to /server
 4. Install dependencies with `npm install`
-5. Start server locally using `npm start`
+5. Start server locally using `npm run start`
 
 ### Frontend
 6. Open /client/index.html in your web browser
