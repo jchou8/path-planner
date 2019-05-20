@@ -9,13 +9,7 @@ const addr = process.env.ADDR || ':80'
 const [host, port] = addr.split(':')
 
 app.use(morgan('dev'))
-
-// Set up generic error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.set("Content-Type", "text/plain");
-    res.status(500).send(err.message);
-});
+app.use(express.json())
 
 app.post('/api/maps', handlers.createMap)
 app.post('/api/paths/start', handlers.setStart)
