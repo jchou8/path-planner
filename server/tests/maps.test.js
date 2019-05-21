@@ -39,7 +39,7 @@ describe('Test /api/maps', () => {
     it('should fail if coords <= 0', () => {
         return request(app)
             .post(route)
-            .send({row: 2, col: 0})
+            .send({row: 2, col: -1})
             .expect(400)
     })
 

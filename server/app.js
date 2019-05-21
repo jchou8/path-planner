@@ -30,7 +30,8 @@ let map = {}
 //////////////
 function createMap(req, res, next) {
     // Send error message if either param is missing or invalid
-    if (!parseInt(req.body.row) || !parseInt(req.body.col)) {
+    if (!parseInt(req.body.row) || !parseInt(req.body.col) ||
+        req.body.row <= 0 || req.body.col <= 0) {
         return sendMessage(res, 400, 'Invalid map dimensions provided.')
     }
 
@@ -237,7 +238,7 @@ function search(map) {
             current = current.parent
         }
     }
-    
+
     return path
 }
 
