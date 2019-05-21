@@ -1,5 +1,20 @@
 'use strict';
 
+const express = require('express')
+const morgan = require('morgan')
+
+const app = express()
+
+app.use(morgan('dev'))
+app.use(express.json())
+
+app.post('/api/maps', createMap)
+app.post('/api/paths/start', setStart)
+app.post('/api/paths/goal', setGoal)
+app.post('/api/costs', setCosts)
+app.get('/api/paths', findPath)
+
+
 /* Map representation: 
     width:  int    - The width of the map
     height: int    - The height of the map
@@ -9,6 +24,9 @@
 */
 let map = {}
 
+//////////////
+/* Handlers */
+//////////////
 function createMap(req, res, next) {
     // Send error message if either param is missing or invalid
     if (!parseInt(req.body.row) || !parseInt(req.body.col)) {
@@ -72,13 +90,18 @@ function setCosts(req, res, next) {
         return sendMessage(res, 400, 'No costs provided.')
     }
 
-    req.body.costs.forEach(cost => {
-        if (validCoords(cost) && !isNaN(parseInt(cost.value))) {
-            map.costs[cost.j][cost.i] = parseInt(cost.value)
+    let newCosts = JSON.parse(JSON.stringify(map.costs));
+    for (let i = 0; i < req.body.costs.length; i++) {
+        let cost = req.body.costs[i]
+        if (validCoords(cost) && !isNaN(parseFloat(cost.value))) {
+            newCosts[cost.j][cost.i] = parseFloat(cost.value)
+        } else {
+            return sendMessage(res, 400, `Invalid cost at position ${i}.`)
         }
-    })
+    }
 
-    res.status(201).send(req.body.costs)
+    map.costs = newCosts
+    res.status(201).send({costs: req.body.costs})
 }
 
 function findPath(req, res, next) {
@@ -127,10 +150,4 @@ function createCostArray(width, height) {
 }
 
 
-module.exports = {
-    createMap,
-    setStart,
-    setGoal,
-    setCosts,
-    findPath
-}
+module.exports = app
