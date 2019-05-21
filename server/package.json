@@ -18,8 +18,10 @@
   },
   "homepage": "https://github.com/jchou8/path-planner#readme",
   "dependencies": {
+    "async": "^3.0.0",
     "express": "^4.17.0",
-    "morgan": "^1.9.1"
+    "morgan": "^1.9.1",
+    "tinyqueue": "^2.0.2"
   },
   "devDependencies": {
     "jest": "^24.8.0",

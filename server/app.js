@@ -2,6 +2,7 @@
 
 const express = require('express')
 const morgan = require('morgan')
+const TinyQueue = require('tinyqueue')
 
 const app = express()
 
@@ -51,7 +52,7 @@ function setStart(req, res, next) {
     if (!mapExists()) {
         return sendMessage(res, 400, 'Map has not yet been created.')
     }
-    
+
     if (!validCoords(req.body)) {
         return sendMessage(res, 400, 'Invalid starting coordinates.')
     }
@@ -68,7 +69,7 @@ function setGoal(req, res, next) {
     if (!mapExists()) {
         return sendMessage(res, 400, 'Map has not yet been created.')
     }
-    
+
     if (!validCoords(req.body)) {
         return sendMessage(res, 400, 'Invalid goal coordinates.')
     }
@@ -101,7 +102,7 @@ function setCosts(req, res, next) {
     }
 
     map.costs = newCosts
-    res.status(201).send({costs: req.body.costs})
+    res.status(201).send({ costs: req.body.costs })
 }
 
 function findPath(req, res, next) {
@@ -116,9 +117,12 @@ function findPath(req, res, next) {
     if (!map.goal) {
         return sendMessage(res, 400, 'Goal position not yet set.')
     }
-    
-    // Use A* algorithm for pathfinding
-    res.status(501).send('Not yet implemented')
+
+    let path = search(map)
+    res.status(200).send({
+        steps: path.length,
+        path: path
+    })
 }
 
 /////////////
@@ -149,5 +153,92 @@ function createCostArray(width, height) {
     return arr
 }
 
+// Heuristic function to calculate disance from goal
+function heuristic(a, b) {
+    return Math.abs(a.i - b.i) + Math.abs(a.j - b.j)
+}
+
+// Get neighboring nodes
+function neighbors(node, iMax, jMax) {
+    let result = []
+    if (node.i > 0) {
+        result.push({ i: node.i - 1, j: node.j })
+    }
+
+    if (node.j > 0) {
+        result.push({ i: node.i, j: node.j - 1 })
+    }
+
+    if (node.i < iMax - 1) {
+        result.push({ i: node.i + 1, j: node.j })
+    }
+
+    if (node.j < jMax - 1) {
+        result.push({ i: node.i, j: node.j + 1 })
+    }
+
+    return result
+}
+
+function coordsEqual(a, b) {
+    return a.i === b.i && a.j === b.j
+}
+
+// Returns the path between start and goal points of the given map
+function search(map) {
+    // A* pathfinding algorithm
+    let startNode = {
+        i: map.start.i,
+        j: map.start.j,
+        value: 0,
+        cost: 0
+    }
+    let queue = new TinyQueue([startNode], (a, b) => a.value - b.value)
+    let visited = [startNode]
+    let foundPath = false
+    let current
+
+    while (queue.length > 0) {
+        current = queue.pop()
+        if (coordsEqual(current, map.goal)) {
+            foundPath = true
+            break
+        }
+
+        let curCost = visited.find(node => coordsEqual(node, current)).cost
+        neighbors(current, map.height, map.width).forEach(neighbor => {
+            let newCost = curCost + map.costs[neighbor.j][neighbor.i] + 1
+            let visitedNode = visited.find(node => coordsEqual(node, neighbor))
+            if ((!visitedNode || newCost < visitedNode.cost) && newCost < Infinity) {
+                if (!visitedNode) {
+                    visitedNode = {
+                        i: neighbor.i,
+                        j: neighbor.j,
+                        cost: newCost
+                    }
+                    visited.push(visitedNode)
+                } else {
+                    visitedNode.cost = newCost
+                }
+
+                visitedNode.value = newCost + heuristic(neighbor, map.goal)
+                visitedNode.parent = current
+                queue.push(visitedNode)
+            }
+        })
+    }
+
+    let path = []
+
+    if (foundPath) {
+        // Backtrack through parent pointers to get path
+        while (current) {
+            path.push({ i: current.i, j: current.j })
+            current = current.parent
+        }
+    }
+    
+    return path
+}
 
 module.exports = app
