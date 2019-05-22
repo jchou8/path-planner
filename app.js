@@ -21,7 +21,7 @@ app.get('/api/paths', findPath)
     height: int    - The height of the map
     start:  {i, j} - Starting coordinates
     goal:   {i, j} - Goal coordinates
-    costs:  [][]   - 2D array; each cell stores int representing tile cost 
+    costs:  [][]   - 2D array; each cell stores number representing tile cost 
 */
 let map = {}
 

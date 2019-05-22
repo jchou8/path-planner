@@ -4,15 +4,8 @@ An API that supports building a map and finding the optimal path through it.
 ## Instructions
 1. Navigate to [repo](https://github.com/jchou8/path-planner)
 2. Clone locally using `git clone https://github.com/jchou8/path-planner.git`
-
-### Backend
-3. Navigate to /server
-4. Install dependencies with `npm install`
-5. Start server locally using `npm run start`
-
-### Frontend
-6. Open /client/index.html in your web browser
-7. That's it!
+3. Install dependencies with `npm install`
+4. Start server locally using `npm run start`
 
 ## Notes
 * I built the server using Node.js and [Express](https://expressjs.com/).
@@ -31,6 +24,3 @@ I added some simple error handling to each route - in response to invalid user i
 
 ### Write unit tests for your algorithms
 Using [Jest](https://jestjs.io/) and [supertest](https://github.com/visionmedia/supertest), I wrote several tests for each route to ensure that they provide the correct status codes and responses in response to valid and invalid input. These tests can be run with `npm test`.
-
-### Visualize the path with a frontend application
-(in progress)
