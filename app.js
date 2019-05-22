@@ -92,7 +92,9 @@ function setCosts(req, res, next) {
         return sendMessage(res, 400, 'No costs provided.')
     }
 
+    // Copy costs array - we don't want to modify the original until we validate everything
     let newCosts = JSON.parse(JSON.stringify(map.costs));
+
     for (let i = 0; i < req.body.costs.length; i++) {
         let cost = req.body.costs[i]
         if (validCoords(cost) && !isNaN(parseFloat(cost.value))) {
@@ -206,12 +208,19 @@ function search(map) {
             break
         }
 
+        // Grab the current node's cost
         let curCost = visited.find(node => coordsEqual(node, current)).cost
+
+        // Visit current node's neighbors
         neighbors(current, map.height, map.width).forEach(neighbor => {
+            // Calculate the cost to step to this neighbor
             let newCost = curCost + map.costs[neighbor.j][neighbor.i] + 1
+
+            // Check if we've visited this node; grab it if we have
             let visitedNode = visited.find(node => coordsEqual(node, neighbor))
             if ((!visitedNode || newCost < visitedNode.cost) && newCost < Infinity) {
                 if (!visitedNode) {
+                    // Haven't visited this node yet
                     visitedNode = {
                         i: neighbor.i,
                         j: neighbor.j,
@@ -219,10 +228,14 @@ function search(map) {
                     }
                     visited.push(visitedNode)
                 } else {
+                    // We've already visited but we found a better path, update cost
                     visitedNode.cost = newCost
                 }
 
+                // Update position in queue using heuristic cost
                 visitedNode.value = newCost + heuristic(neighbor, map.goal)
+
+                // Set backpointer 
                 visitedNode.parent = current
                 queue.push(visitedNode)
             }
